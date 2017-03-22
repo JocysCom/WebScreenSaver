@@ -15,6 +15,7 @@ GOTO:EOF
 :: ".NET developer \ Tools" and deselect everything else.
 set sgt=%ProgramFiles%\Microsoft SDKs\Windows\v7.1\Bin\signtool.exe
 if not exist "%sgt%" set sgt=%ProgramFiles(x86)%\Microsoft SDKs\Windows\v7.1A\Bin\signtool.exe
+if not exist "%sgt%" set sgt=%ProgramFiles(x86)%\Microsoft SDKs\ClickOnce\SignTool\signtool.exe
 set pfx=D:\_Backup\Configuration\SSL\CodeSign_Standard\2016\Evaldas_Jocys.CodeSign.pfx
 set d=Jocys.com Web Screen Saver
 set du=http://www.jocys.com/projects/WebScreenSaver
