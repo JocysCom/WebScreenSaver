@@ -1,14 +1,13 @@
-# WebScreenSaver
-Use web site or page as a screen saver.
-
-
 # WebScreenSaver • [Download](https://github.com/JocysCom/WebScreenSaver/raw/master/App/Resources/Files/WebScreenSaver.scr)
+
+<hr />
 
 <p>Jocys.com Web Screen Saver allows you to use Internet web page as Windows screen saver. <span style="font-size: 10pt;">For example, you can use it on tablet with “<a href="https://www.paessler.com/prtg" target="_blank">Paessler PRTG Network Monitoring Software</a>”. Screen saver tested on Windows 10 only.</span></p>
 
+<hr />
+
 <p style="text-align: center;"><a href="http://www.jocys.com/Files/Software/Jocys.com_Web_Screen_Saver_Settings.png" target="_blank"><img src="http://www.jocys.com/Files/Software/Jocys.com_Web_Screen_Saver_Settings.png" /></a></p>
 <p><a href="http://www.jocys.com/Files/Software/Jocys.com_Web_Screen_Saver_Edit.png" target="_blank"><img alt="" src="http://www.jocys.com/Files/Software/Jocys.com_Web_Screen_Saver_Edit_Small.png" /></a> <a href="http://www.jocys.com/Files/Software/Jocys.com_Web_Screen_Saver_Tablet.jpg"><img  src="http://www.jocys.com/Files/Software/Jocys.com_Web_Screen_Saver_Tablet_Small.jpg" /></a></p>
-
 
 <p><strong>Installation</strong></p>
 
