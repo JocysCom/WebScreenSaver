@@ -18,7 +18,7 @@
 <p><img alt="" src="http://www.jocys.com/Files/Software/Jocys.com_Web_Screen_Saver_Menu.png" /></p>
 
 ### Configuration
-<ht />
+<hr />
 
 <p>Right-click on “WebScreenSaver.scr” file and select “Configure” menu option.</p>
 
