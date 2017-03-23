@@ -1,7 +1,5 @@
 # WebScreenSaver • [Download](https://github.com/JocysCom/WebScreenSaver/raw/master/App/Resources/Files/WebScreenSaver.scr)
 
-<hr />
-
 <p>Jocys.com Web Screen Saver allows you to use Internet web page as Windows screen saver. <span style="font-size: 10pt;">For example, you can use it on tablet with “<a href="https://www.paessler.com/prtg" target="_blank">Paessler PRTG Network Monitoring Software</a>”. Screen saver tested on Windows 10 only.</span></p>
 
 <hr />
@@ -11,14 +9,14 @@
 
 <p><a href="http://www.jocys.com/Files/Software/Jocys.com_Web_Screen_Saver_Settings.png"><img src="http://www.jocys.com/Files/Software/Jocys.com_Web_Screen_Saver_Settings.png" /></a></p>
 
-<p><strong>Installation</strong></p>
+### Installation
 
 <p>1. Download “<a href="http://github.com/JocysCom/WebScreenSaver/raw/master/App/Resources/Files/WebScreenSaver.scr">WebScreenSaver.scr</a>” file and save it in permanent folder.<br />
 2. Right-click on “WebScreenSaver.scr” file and select "Install" menu option.</p>
 
 <p><img alt="" src="http://www.jocys.com/Files/Software/Jocys.com_Web_Screen_Saver_Menu.png" /></p>
 
-<p><strong>Configuration</strong></p>
+### Configuration
 
 <p>Right-click on “WebScreenSaver.scr” file and select “Configure” menu option.</p>
 
@@ -30,6 +28,6 @@
 
 <p><img alt="" src="http://www.jocys.com/Files/Software/Screen_Saver_Settings.png" /></p>
 
-<p><strong>Uninstallation</strong></p>
+### Uninstallation
 
 <p>Delete “WebScreenSaver.scr” file.</p>
