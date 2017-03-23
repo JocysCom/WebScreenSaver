@@ -1,6 +1,6 @@
 # WebScreenSaver • [Download](https://github.com/JocysCom/WebScreenSaver/raw/master/App/Resources/Files/WebScreenSaver.scr)
 
-<p>Jocys.com Web Screen Saver allows you to use Internet web pages as Windows screen saver. You can protect your computer by enabling screen saver locking feature in Windows Screen Saver Options. <span style="font-size: 10pt;">For example, you can use it on tablet with “<a href="https://www.paessler.com/prtg" target="_blank">Paessler PRTG Network Monitoring Software</a>”. Screen saver tested on Windows 10 only.</span></p>
+<p>Jocys.com Web Screen Saver allows you to use Internet web pages as Windows screen saver. You can protect your computer by enabling <b>screen saver locking feature</b> in Windows Screen Saver Options. <span style="font-size: 10pt;">For example, you can use it on tablet with “<a href="https://www.paessler.com/prtg" target="_blank">Paessler PRTG Network Monitoring Software</a>”. Screen saver tested on Windows 10 only.</span></p>
 
 <hr />
 
