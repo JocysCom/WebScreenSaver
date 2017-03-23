@@ -4,8 +4,7 @@
 
 <hr />
 
-<p><a href="http://www.jocys.com/Files/Software/Jocys.com_Web_Screen_Saver_Settings.png"><img src="http://www.jocys.com/Files/Software/Jocys.com_Web_Screen_Saver_Settings_Small.png" /></a> 
-<a href="http://www.jocys.com/Files/Software/Jocys.com_Web_Screen_Saver_Edit.png"><img src="http://www.jocys.com/Files/Software/Jocys.com_Web_Screen_Saver_Edit_Small.png" /></a> <a href="http://www.jocys.com/Files/Software/Jocys.com_Web_Screen_Saver_Tablet.jpg"><img  src="http://www.jocys.com/Files/Software/Jocys.com_Web_Screen_Saver_Tablet_Small.jpg" /></a></p>
+<p><a href="http://www.jocys.com/Files/Software/Jocys.com_Web_Screen_Saver_Edit.png"><img src="http://www.jocys.com/Files/Software/Jocys.com_Web_Screen_Saver_Edit_Small.png" /></a> <a href="http://www.jocys.com/Files/Software/Jocys.com_Web_Screen_Saver_Tablet.jpg"><img  src="http://www.jocys.com/Files/Software/Jocys.com_Web_Screen_Saver_Tablet_Small.jpg" /></a></p>
 
 <p><a href="http://www.jocys.com/Files/Software/Jocys.com_Web_Screen_Saver_Settings.png"><img src="http://www.jocys.com/Files/Software/Jocys.com_Web_Screen_Saver_Settings.png" /></a></p>
 
