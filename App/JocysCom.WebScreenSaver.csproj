@@ -62,6 +62,7 @@
     <Compile Include="JocysCom\Common\TraceFormat.cs" />
     <Compile Include="JocysCom\ComponentModel\PropertyComparer.cs" />
     <Compile Include="JocysCom\ComponentModel\SortableBindingList.cs" />
+    <Compile Include="JocysCom\Configuration\Arguments.cs" />
     <Compile Include="JocysCom\Configuration\AssemblyInfo.cs" />
     <Compile Include="JocysCom\Configuration\ExtendedDataGridViewColumnCollectionEditor.cs" />
     <Compile Include="JocysCom\Configuration\InstallContext.cs" />

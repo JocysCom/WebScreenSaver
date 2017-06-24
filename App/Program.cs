@@ -19,24 +19,17 @@ namespace JocysCom.WebScreenSaver
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
             // Requires System.Configuration.Installl reference.
-            var ic = new InstallContext(null, args);
+            var ic = new Arguments(args);
             // c – Show the configuration settings dialog box.
-            if (ic.Parameters.Count == 0 || ic.Parameters.ContainsKey("c"))
+            if (ic.Count == 0 || ic.ContainsKey("c", true))
             {
                 Application.Run(new SettingsForm());
             }
             // p #### – Display a preview of the screensaver using the specified window handle.
-            else if (ic.Parameters.ContainsKey("p"))
+            else if (ic.ContainsKey("p", true))
             {
-                var handleValue = ic.Parameters["p"];
-                // If parameter was separated by space instead of '=' then...
-                if (string.IsNullOrEmpty(handleValue))
-                {
-                    var index = args.Select(x => x.ToLower()).ToList().IndexOf("p");
-                    if (index + 1 < args.Length) handleValue = args[index + 1];
-                }
-                long handle;
-                if (long.TryParse(handleValue, out handle))
+                var handle = ic.GetValue<long>("p");
+                if (handle > 0)
                 {
                     var previewWndHandle = new IntPtr(handle);
                     Application.Run(new ScreenSaverForm(previewWndHandle));
@@ -48,18 +41,18 @@ namespace JocysCom.WebScreenSaver
                 }
             }
             // s – Start the screensaver in full-screen mode.
-            else if (ic.Parameters.ContainsKey("s"))
+            else if (ic.ContainsKey("s"))
             {
                 ScreenSaverForm.ShowScreenSaver(false);
                 Application.Run();
             }
-            else if (ic.Parameters.ContainsKey("d"))
+            else if (ic.ContainsKey("d"))
             {
                 // d – Start the screensaver in debug mode.
             }
             else
             {
-                var error = string.Format("Command line argument \"{0}\" is not valid.", ic.Parameters.Keys.Cast<string>().First());
+                var error = string.Format("Command line argument \"{0}\" is not valid.", ic.Keys.Cast<string>().First());
                 MessageBox.Show(error, Application.ProductName, MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
             }
         }
