@@ -15,119 +15,57 @@ namespace JocysCom.WebScreenSaver
 	public partial class ScreenSaverForm : Form
 	{
 
-		internal class NativeMethods
-		{
-
-			/// <summary>
-			/// Changes the parent window of the specified child window.
-			/// </summary>
-			/// <param name="hWndChild">A handle to the child window.</param>
-			/// <param name="hWndNewParent">
-			/// A handle to the new parent window. If this parameter is NULL, the desktop window becomes the new parent window.
-			/// If this parameter is HWND_MESSAGE, the child window becomes a message-only window.
-			/// </param>
-			/// <returns></returns>
-			[DllImport("user32.dll", SetLastError = true)]
-			internal static extern IntPtr SetParent(IntPtr hWndChild, IntPtr hWndNewParent);
-
-			/// <summary>
-			/// Changes an attribute of the specified window. The function also sets the 32-bit (long)
-			/// value at the specified offset into the extra window memory.
-			/// </summary>
-			/// <param name="hWnd">A handle to the window and, indirectly, the class to which the window belongs.</param>
-			/// <param name="nIndex">The zero-based offset to the value to be set.</param>
-			/// <param name="dwNewLong">The replacement value.</param>
-			/// <returns></returns>
-			[DllImport("user32.dll", SetLastError = true)]
-			internal static extern int SetWindowLong(IntPtr hWnd, int nIndex, int dwNewLong);
-
-			/// <summary>
-			/// Retrieves information about the specified window. The function also retrieves the 32-bit (DWORD)
-			/// value at the specified offset into the extra window memory.
-			/// </summary>
-			/// <param name="hWnd">A handle to the window and, indirectly, the class to which the window belongs.</param>
-			/// <param name="nIndex">The zero-based offset to the value to be retrieved. </param>
-			/// <returns></returns>
-			[DllImport("user32.dll", SetLastError = true)]
-			internal static extern int GetWindowLong(IntPtr hWnd, int nIndex);
-
-			/// <summary>
-			/// Retrieves the coordinates of a window's client area. 
-			/// </summary>
-			/// <param name="hWnd">A handle to the window whose client coordinates are to be retrieved.</param>
-			/// <param name="lpRect">A pointer to a RECT structure that receives the client coordinates.</param>
-			/// <returns></returns>
-			[DllImport("user32.dll", SetLastError = true)]
-			internal static extern bool GetClientRect(IntPtr hWnd, out Rectangle lpRect);
-
-		}
-
 		Point mouseLocation;
+		/// <summary>
+		/// If _PreviewMode (small preview inside screensaver settings) then do not track mouse/keyboard movements.
+		/// </summary>
 		bool _PreviewMode;
-		bool _FromProgram;
+		/// <summary>
+		/// If FromSettings then only this form will be closed, instead of exiting application.
+		/// </summary>
+		bool _FromSettings;
 		Random rand = new Random();
 
 		System.Timers.Timer RefreshTimer;
 		System.Timers.Timer GoNextTimer;
 		object TimersLock = new object();
 
+		/// <summary>
+		/// Should be used for design this form on Visual Studio only.
+		/// </summary>
 		public ScreenSaverForm()
 		{
 			InitializeComponent();
 		}
 
-		public ScreenSaverForm(Rectangle Bounds, bool fromProgram)
+		public ScreenSaverForm(Rectangle Bounds, bool fromSettings, bool previewMode)
 		{
-			_FromProgram = fromProgram;
+			_FromSettings = fromSettings;
+			_PreviewMode = previewMode;
 			InitializeComponent();
 			this.Bounds = Bounds;
 		}
 
-		/// <summary>Sets a new window style.</summary>
-		const int GWL_STYLE = -16;
-		/// <summary>Child window. A window with this style cannot have a menu bar.</summary>
-		public const int WS_CHILD = 0x40000000;
-
-		public ScreenSaverForm(IntPtr PreviewWndHandle)
-		{
-			InitializeComponent();
-			// Set the preview window as the parent of this window
-			NativeMethods.SetParent(Handle, PreviewWndHandle);
-			// Retrieve information about this window.
-			var windowLong = NativeMethods.GetWindowLong(Handle, GWL_STYLE);
-			// Make this a child window so it will close when the parent dialog closes
-			NativeMethods.SetWindowLong(Handle, GWL_STYLE, windowLong | WS_CHILD);
-			// Place our window inside the parent
-			Rectangle ParentRect;
-			NativeMethods.GetClientRect(PreviewWndHandle, out ParentRect);
-			Size = ParentRect.Size;
-			Location = new Point(0, 0);
-			_PreviewMode = true;
-		}
-
 		void HideScreenSaver()
 		{
-			if (!_PreviewMode)
+			if (_FromSettings)
 			{
-				if (_FromProgram)
-				{
-					Close();
-				}
-				else
-				{
-					Application.Exit();
-				}
+				Close();
+			}
+			else
+			{
+				Application.Exit();
 			}
 		}
 
 		/// <summary>
 		/// Display the form on each of the computer's monitors.
 		/// </summary>
-		public static void ShowScreenSaver(bool fromProgram)
+		public static void ShowScreenSaver(bool fromSettings)
 		{
 			foreach (Screen screen in Screen.AllScreens)
 			{
-				var screensaver = new ScreenSaverForm(screen.Bounds, fromProgram);
+				var screensaver = new ScreenSaverForm(screen.Bounds, fromSettings, false);
 				screensaver.Show();
 			}
 		}
@@ -144,19 +82,14 @@ namespace JocysCom.WebScreenSaver
 		{
 			var info = new AssemblyInfo();
 			Text = info.GetTitle();
-			lock (hookLocks)
-			{
-				mouseHook = new MouseHook();
-				mouseHook.OnMouseMove += MouseHook_OnMouseMove;
-				mouseHook.OnMouseDown += MouseHook_OnMouseDown;
-				mouseHook.Start();
-				keyboardHook = new KeyboardHook();
-				keyboardHook.KeyDown += KeyboardHook_KeyDown;
-				keyboardHook.Start();
-			}
 			// Use the string from the Registry if it exists
 			SettingsManager.WebItems.Load();
 			LoadNextItem();
+			// If this is not preview then...
+			if (!_PreviewMode)
+			{
+				StartMouseAndKeyboardMonitor();
+			}
 		}
 
 		#region Timers
@@ -269,6 +202,21 @@ namespace JocysCom.WebScreenSaver
 
 		#region Keyborad and Mouse Hook
 
+		void StartMouseAndKeyboardMonitor()
+		{
+			// Track mouse and keyboard for auto close.
+			lock (hookLocks)
+			{
+				mouseHook = new MouseHook();
+				mouseHook.OnMouseMove += MouseHook_OnMouseMove;
+				mouseHook.OnMouseDown += MouseHook_OnMouseDown;
+				mouseHook.Start();
+				keyboardHook = new KeyboardHook();
+				keyboardHook.KeyDown += KeyboardHook_KeyDown;
+				keyboardHook.Start();
+			}
+		}
+
 		MouseHook mouseHook;
 		KeyboardHook keyboardHook;
 		object hookLocks = new object();
@@ -285,19 +233,16 @@ namespace JocysCom.WebScreenSaver
 
 		private void MouseHook_OnMouseMove(object sender, MouseEventArgs e)
 		{
-			if (!_PreviewMode)
+			if (!mouseLocation.IsEmpty)
 			{
-				if (!mouseLocation.IsEmpty)
+				// Terminate if mouse is moved a significant distance
+				if (Math.Abs(mouseLocation.X - e.X) > 5 || Math.Abs(mouseLocation.Y - e.Y) > 5)
 				{
-					// Terminate if mouse is moved a significant distance
-					if (Math.Abs(mouseLocation.X - e.X) > 5 || Math.Abs(mouseLocation.Y - e.Y) > 5)
-					{
-						HideScreenSaver();
-					}
+					HideScreenSaver();
 				}
-				// Update current mouse location
-				mouseLocation = e.Location;
 			}
+			// Update current mouse location
+			mouseLocation = e.Location;
 		}
 
 		#endregion

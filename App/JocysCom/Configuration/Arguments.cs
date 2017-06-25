@@ -10,8 +10,8 @@ namespace JocysCom.ClassLibrary.Configuration
 	/// </summary>
 	public class Arguments : StringDictionary
 	{
-		// Constructor
-		public Arguments(string[] args)
+
+		public Arguments(string[] args, bool ignoreCase = false)
 		{
 			Regex spliter = new Regex(@"^-{1,2}|^/|=|:",
 				RegexOptions.IgnoreCase | RegexOptions.Compiled);
@@ -39,10 +39,10 @@ namespace JocysCom.ClassLibrary.Configuration
 					case 1:
 						if (Parameter != null)
 						{
-							if (!ContainsKey(Parameter))
+							if (!base.ContainsKey(Parameter))
 							{
 								Parts[0] = remover.Replace(Parts[0], "$1");
-								Add(Parameter, Parts[0]);
+								base.Add(Parameter, Parts[0]);
 							}
 							Parameter = null;
 						}
@@ -55,8 +55,8 @@ namespace JocysCom.ClassLibrary.Configuration
 						// With no value, set it to true.
 						if (Parameter != null)
 						{
-							if (!ContainsKey(Parameter))
-								Add(Parameter, null);
+							if (!base.ContainsKey(Parameter))
+								base.Add(Parameter, null);
 						}
 						Parameter = Parts[1];
 						break;
@@ -67,17 +67,17 @@ namespace JocysCom.ClassLibrary.Configuration
 						// With no value, set it to true.
 						if (Parameter != null)
 						{
-							if (!ContainsKey(Parameter))
-								Add(Parameter, null);
+							if (!base.ContainsKey(Parameter))
+								base.Add(Parameter, null);
 						}
 
 						Parameter = Parts[1];
 
 						// Remove possible enclosing characters (",')
-						if (!ContainsKey(Parameter))
+						if (!base.ContainsKey(Parameter))
 						{
 							Parts[2] = remover.Replace(Parts[2], "$1");
-							Add(Parameter, Parts[2]);
+							base.Add(Parameter, Parts[2]);
 						}
 						Parameter = null;
 						break;
@@ -86,8 +86,8 @@ namespace JocysCom.ClassLibrary.Configuration
 			// In case a parameter is still waiting
 			if (Parameter != null)
 			{
-				if (!ContainsKey(Parameter))
-					Add(Parameter, null);
+				if (!base.ContainsKey(Parameter))
+					base.Add(Parameter, null);
 			}
 		}
 
