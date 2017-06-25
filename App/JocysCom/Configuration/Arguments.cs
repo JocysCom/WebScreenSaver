@@ -11,7 +11,7 @@ namespace JocysCom.ClassLibrary.Configuration
 	public class Arguments : StringDictionary
 	{
 
-		public Arguments(string[] args, bool ignoreCase = false)
+		public Arguments(string[] args)
 		{
 			Regex spliter = new Regex(@"^-{1,2}|^/|=|:",
 				RegexOptions.IgnoreCase | RegexOptions.Compiled);
