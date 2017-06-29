@@ -14,7 +14,7 @@
 <p>1. Download “<a href="http://github.com/JocysCom/WebScreenSaver/raw/master/App/Resources/Files/WebScreenSaver.scr">WebScreenSaver.scr</a>” file and save it in permanent folder.<br />
 2. Right-click on “WebScreenSaver.scr” file and select "Install" menu option.</p>
 
-<p><img alt="" src="http://www.jocys.com/Files/Software/Jocys.com_Web_Screen_Saver_Menu.png" /></p>
+<p><img alt="" src="http://www.jocys.com/Files/Software/Jocys.com_Web_Screen_Saver_Menu_GitHub.png" /></p>
 
 ### Configuration
 <hr />
