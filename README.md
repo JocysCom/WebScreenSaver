@@ -4,7 +4,7 @@
 
 <hr />
 
-<p><img src="http://www.jocys.com/Files/Software/Jocys.com_Web_Screen_Saver_Edit.png" /><img  src="http://www.jocys.com/Files/Software/Jocys.com_Web_Screen_Saver_Tablet_GitHub_3.jpg" /></p>
+<p><img src="http://www.jocys.com/Files/Software/Jocys.com_Web_Screen_Saver_Edit.png" /><img  src="http://www.jocys.com/Files/Software/Jocys.com_Web_Screen_Saver_Tablet_GitHub_4.jpg" /></p>
 
 <p><img src="http://www.jocys.com/Files/Software/Jocys.com_Web_Screen_Saver_Settings.png" /></p>
 
