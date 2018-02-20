@@ -60,6 +60,7 @@
     <Compile Include="Common\WebItem.cs" />
     <Compile Include="JocysCom\Common\Helper.cs" />
     <Compile Include="JocysCom\Common\TraceFormat.cs" />
+    <Compile Include="JocysCom\ComponentModel\BindingListInvoked.cs" />
     <Compile Include="JocysCom\ComponentModel\PropertyComparer.cs" />
     <Compile Include="JocysCom\ComponentModel\SortableBindingList.cs" />
     <Compile Include="JocysCom\Configuration\Arguments.cs" />
@@ -88,6 +89,9 @@
     <Compile Include="JocysCom\Controls\MessageBoxForm.Designer.cs">
       <DependentUpon>MessageBoxForm.cs</DependentUpon>
     </Compile>
+    <Compile Include="JocysCom\Controls\VirtualDataGridView.cs">
+      <SubType>Component</SubType>
+    </Compile>
     <Compile Include="JocysCom\Processes\BaseHook.cs" />
     <Compile Include="JocysCom\Processes\CURSORINFO.cs" />
     <Compile Include="JocysCom\Processes\HookType.cs" />
@@ -106,6 +110,8 @@
     <Compile Include="JocysCom\Runtime\ChangeState.cs" />
     <Compile Include="JocysCom\Runtime\Helper.cs" />
     <Compile Include="JocysCom\Runtime\Serializer.cs" />
+    <Compile Include="JocysCom\Security\HashHelper.cs" />
+    <Compile Include="JocysCom\Security\MD5Helper.cs" />
     <Compile Include="JocysCom\Win32\ICONINFO.cs" />
     <Compile Include="JocysCom\Win32\POINT.cs" />
     <Compile Include="ScreenSaverForm.cs">

@@ -119,10 +119,10 @@ namespace JocysCom.ClassLibrary.Configuration
 		public T GetValue<T>(string key, bool ignoreCase = false) where T : struct
 		{
 			var valueString = GetValue(key, ignoreCase);
-			T result;
-			TryParse(valueString, out result);
-			return result;
+			return TryParse<T>(valueString);
 		}
+
+		#region Try Parse
 
 		/// <summary>
 		/// Tries to convert the specified string representation of a logical value to
@@ -135,14 +135,43 @@ namespace JocysCom.ClassLibrary.Configuration
 		/// <returns>If value was converted successfully, true; otherwise false.</returns>
 		static bool TryParse<T>(string value, out T result) where T : struct
 		{
-			var tryParseMethod = typeof(T).GetMethod("TryParse",
+			var t = typeof(T);
+			if (t.IsEnum)
+			{
+				return System.Enum.TryParse(value, true, out result);
+			}
+			var tryParseMethod = t.GetMethod("TryParse",
 				BindingFlags.Static | BindingFlags.Public, null,
-				new[] { typeof(string), typeof(T).MakeByRefType() }, null);
+				new[] { typeof(string), t.MakeByRefType() }, null);
 			var parameters = new object[] { value, null };
 			var retVal = (bool)tryParseMethod.Invoke(null, parameters);
 			result = (T)parameters[1];
 			return retVal;
 		}
+
+		/// <summary>
+		/// Tries to convert the specified string representation of a logical value to
+		/// its type T equivalent. Returns default value if conversion failed.
+		/// </summary>
+		public static T TryParse<T>(string value, T defaultValue = default(T)) where T : struct
+		{
+			T result = default(T);
+			return TryParse(value, out result)
+				? result
+				: defaultValue;
+		}
+
+		/// <summary>
+		/// Tries to convert the specified string representation of a logical value to
+		/// its type T equivalent. Returns default value if conversion failed.
+		/// </summary>
+		public static bool CanParse<T>(string value) where T : struct
+		{
+			T result;
+			return TryParse(value, out result);
+		}
+
+		#endregion
 
 	}
 }

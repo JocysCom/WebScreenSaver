@@ -1,5 +1,6 @@
 using System;
 using System.Configuration;
+using System.Diagnostics;
 using System.IO;
 using System.Reflection;
 using System.Runtime.InteropServices;
@@ -11,7 +12,27 @@ namespace JocysCom.ClassLibrary.Configuration
 
 		public AssemblyInfo()
 		{
-			_assembly = Assembly.GetEntryAssembly();
+			_assembly =
+				Assembly.GetEntryAssembly() ??
+				FindEntryAssembly1() ??
+				FindEntryAssembly2() ??
+				Assembly.GetCallingAssembly() ??
+				Assembly.GetExecutingAssembly();
+		}
+
+		public static AssemblyInfo _Entry;
+		public static object _EntryLock = new object();
+		public static AssemblyInfo Entry
+		{
+			get
+			{
+				lock (_EntryLock)
+				{
+					if (_Entry == null)
+						_Entry = new AssemblyInfo();
+					return _Entry;
+				}
+			}
 		}
 
 		public AssemblyInfo(string strValFile)
@@ -23,6 +44,48 @@ namespace JocysCom.ClassLibrary.Configuration
 		{
 			_assembly = assembly;
 		}
+
+		#region Emtry assembly
+
+		/// <summary>
+		/// Assembly.GetEntryAssembly() returns null in web apps. Mark assembly as the entry assembly
+		/// by adding this attribute inside Properties\AssemblyInfo.cs file:
+		/// [assembly: JocysCom.ClassLibrary.Configuration.AssemblyInfo.EntryAssembly]
+		/// </summary>
+		[AttributeUsage(AttributeTargets.Assembly)]
+		public sealed class EntryAssemblyAttribute : Attribute { }
+
+		// Method 1 better works on multiple assemblies marked as entry.
+		Assembly FindEntryAssembly1()
+		{
+			var frames = new StackTrace().GetFrames();
+			Array.Reverse(frames);
+			foreach (var frame in frames)
+			{
+				var declaringType = frame.GetMethod().DeclaringType;
+				var assembly = Assembly.GetAssembly(declaringType);
+				var attribute = assembly.GetCustomAttributes(typeof(EntryAssemblyAttribute), false);
+				if (attribute.Length > 0)
+					return assembly;
+			}
+			return null;
+		}
+
+
+		// Find on current domain.
+		Assembly FindEntryAssembly2()
+		{
+			var assemblies = AppDomain.CurrentDomain.GetAssemblies();
+			foreach (var assembly in assemblies)
+			{
+				var attribute = assembly.GetCustomAttributes(typeof(EntryAssemblyAttribute), false);
+				if (attribute.Length > 0)
+					return assembly;
+			}
+			return null;
+		}
+
+		#endregion
 
 		public Assembly Assembly
 		{
@@ -121,7 +184,51 @@ namespace JocysCom.ClassLibrary.Configuration
 			{
 				s += " - " + Description;
 			}
+			// Add elevated tag.
+			var identity = System.Security.Principal.WindowsIdentity.GetCurrent();
+			var isElevated = identity.Owner != identity.User;
+			// Add running user.
+			string windowsDomain = GetWindowsDomainName();
+			string windowsUser = GetWindowsUserName();
+			string processDomain = Environment.UserDomainName;
+			string processUser = Environment.UserName;
+			if (string.Compare(windowsDomain, processDomain, true) != 0 || string.Compare(windowsUser, processUser, true) != 0)
+				s += string.Format(" ({0}\\{1})", processDomain, processUser);
+			else if (isElevated)
+				s += " (Administrator)";
+			// if (WinAPI.IsVista && WinAPI.IsElevated() && WinAPI.IsInAdministratorRole) this.Text += " (Administrator)";
 			return s.Trim();
+		}
+
+		[DllImport("wtsapi32.dll")]
+		public static extern bool WTSQuerySessionInformationW(
+			IntPtr hServer,
+			int SessionId,
+			int WTSInfoClass,
+			out IntPtr ppBuffer,
+			out IntPtr pBytesReturned
+		);
+
+		public string GetWindowsDomainName() { return GetInformation(7); }
+
+		public string GetWindowsUserName() { return GetInformation(5); }
+
+		string GetInformation(int WTSInfoClass)
+		{
+			// Use current context.
+			var WTS_CURRENT_SERVER_HANDLE = IntPtr.Zero;
+			var p = System.Diagnostics.Process.GetCurrentProcess();
+			IntPtr AnswerBytes;
+			IntPtr AnswerCount;
+			// Get domain name.
+			var success = WTSQuerySessionInformationW(
+				WTS_CURRENT_SERVER_HANDLE,
+				p.SessionId,
+				WTSInfoClass,
+				out AnswerBytes,
+				out AnswerCount
+			);
+			return Marshal.PtrToStringUni(AnswerBytes);
 		}
 
 		public static DateTime GetBuildDateTime(string filePath)
@@ -181,6 +288,20 @@ namespace JocysCom.ClassLibrary.Configuration
 		{
 			T attribute = (T)Attribute.GetCustomAttribute(_assembly, typeof(T));
 			return value.Invoke(attribute);
+		}
+
+		public FileInfo GetAppDataFile(bool userLevel, string format, params object[] args)
+		{
+			var specialFolder = userLevel
+				? Environment.SpecialFolder.ApplicationData
+				: Environment.SpecialFolder.CommonApplicationData;
+			var folder = string.Format("{0}\\{1}\\{2}",
+				Environment.GetFolderPath(specialFolder),
+				Company,
+				Product);
+			var file = string.Format(format, args);
+			var path = Path.Combine(folder, file);
+			return new FileInfo(path);
 		}
 
 	}

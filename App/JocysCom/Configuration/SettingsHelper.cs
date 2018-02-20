@@ -1,16 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Xml.Serialization;
-using System.Xml;
+﻿using System.IO;
 using System.Text;
-using System.Windows.Forms;
-using System.Diagnostics;
-using System.Data.Objects.DataClasses;
-using JocysCom.ClassLibrary.Runtime;
-using JocysCom.ClassLibrary.ComponentModel;
-using System.Reflection;
-using System.Linq;
+
 using System.IO.Compression;
 
 namespace JocysCom.ClassLibrary.Configuration
@@ -53,6 +43,63 @@ namespace JocysCom.ClassLibrary.Configuration
 			}
 			dstStream.Close();
 			return dstStream.ToArray();
+		}
+
+		#endregion
+
+		#region Writing
+
+		public static bool IsDifferent(string name, byte[] bytes)
+		{
+			var fi = new FileInfo(name);
+			var isDifferent = false;
+			// If file doesn't exists or file size is different then...
+			if (!fi.Exists || fi.Length != bytes.Length)
+			{
+				isDifferent = true;
+			}
+			else
+			{
+				// Compare checksums.
+				var byteHash = Security.MD5Helper.GetGuid(bytes);
+				var fileHash = Security.MD5Helper.GetGuidFromFile(fi.FullName);
+				isDifferent = !byteHash.Equals(fileHash);
+			}
+			return isDifferent;
+		}
+
+		public static void WriteIfDifferent(string name, byte[] bytes)
+		{
+			var isDifferent = IsDifferent(name, bytes);
+			if (isDifferent)
+			{
+				File.WriteAllBytes(name, bytes);
+			}
+		}
+
+		public static string ReadFileContent(string name, out Encoding encoding)
+		{
+			using (var reader = new System.IO.StreamReader(name, true))
+			{
+				encoding = reader.CurrentEncoding;
+				return reader.ReadToEnd();
+			}
+		}
+
+
+		/// <summary>
+		/// Get file content with encoding header.
+		/// </summary>
+		public static byte[] GetFileConentBytes(string content, Encoding encoding = null)
+		{
+			var ms = new MemoryStream();
+			// Encoding header will be added to content.
+			var sw = new StreamWriter(ms, encoding);
+			sw.Write(content);
+			sw.Flush();
+			var bytes = ms.ToArray();
+			sw.Dispose();
+			return bytes;
 		}
 
 		#endregion

@@ -15,11 +15,14 @@
 		/// </summary>
 		private void InitializeComponent()
 		{
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle1 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle2 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle3 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle4 = new System.Windows.Forms.DataGridViewCellStyle();
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(SettingsUserControl));
-            this.SettingsDataGridView = new System.Windows.Forms.DataGridView();
+            this.SettingsDataGridView = new JocysCom.ClassLibrary.Controls.VirtualDataGridView();
             this.SettingsToolStrip = new System.Windows.Forms.ToolStrip();
+            this.CheckSelectedButton = new System.Windows.Forms.ToolStripButton();
+            this.UncheckSelectedButton = new System.Windows.Forms.ToolStripButton();
+            this.toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
             this.AddButton = new System.Windows.Forms.ToolStripButton();
             this.EditButton = new System.Windows.Forms.ToolStripButton();
             this.DeleteButton = new System.Windows.Forms.ToolStripButton();
@@ -32,6 +35,8 @@
             this.SettingsImportOpenFileDialog = new System.Windows.Forms.OpenFileDialog();
             this.SettingsExportSaveFileDialog = new System.Windows.Forms.SaveFileDialog();
             this.AudioFileOpenFileDialog = new System.Windows.Forms.OpenFileDialog();
+            this.SelectAllButton = new System.Windows.Forms.ToolStripButton();
+            this.DeselectAllButton = new System.Windows.Forms.ToolStripButton();
             ((System.ComponentModel.ISupportInitialize)(this.SettingsDataGridView)).BeginInit();
             this.SettingsToolStrip.SuspendLayout();
             this.SuspendLayout();
@@ -47,14 +52,14 @@
             this.SettingsDataGridView.CellBorderStyle = System.Windows.Forms.DataGridViewCellBorderStyle.SingleHorizontal;
             this.SettingsDataGridView.ClipboardCopyMode = System.Windows.Forms.DataGridViewClipboardCopyMode.EnableWithoutHeaderText;
             this.SettingsDataGridView.ColumnHeadersBorderStyle = System.Windows.Forms.DataGridViewHeaderBorderStyle.None;
-            dataGridViewCellStyle1.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleCenter;
-            dataGridViewCellStyle1.BackColor = System.Drawing.SystemColors.Window;
-            dataGridViewCellStyle1.ForeColor = System.Drawing.SystemColors.WindowText;
-            dataGridViewCellStyle1.Padding = new System.Windows.Forms.Padding(2, 1, 2, 1);
-            dataGridViewCellStyle1.SelectionBackColor = System.Drawing.SystemColors.Highlight;
-            dataGridViewCellStyle1.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
-            dataGridViewCellStyle1.WrapMode = System.Windows.Forms.DataGridViewTriState.True;
-            this.SettingsDataGridView.ColumnHeadersDefaultCellStyle = dataGridViewCellStyle1;
+            dataGridViewCellStyle3.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleCenter;
+            dataGridViewCellStyle3.BackColor = System.Drawing.SystemColors.Window;
+            dataGridViewCellStyle3.ForeColor = System.Drawing.SystemColors.WindowText;
+            dataGridViewCellStyle3.Padding = new System.Windows.Forms.Padding(2, 1, 2, 1);
+            dataGridViewCellStyle3.SelectionBackColor = System.Drawing.SystemColors.Highlight;
+            dataGridViewCellStyle3.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
+            dataGridViewCellStyle3.WrapMode = System.Windows.Forms.DataGridViewTriState.True;
+            this.SettingsDataGridView.ColumnHeadersDefaultCellStyle = dataGridViewCellStyle3;
             this.SettingsDataGridView.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
             this.SettingsDataGridView.Dock = System.Windows.Forms.DockStyle.Fill;
             this.SettingsDataGridView.EnableHeadersVisualStyles = false;
@@ -63,10 +68,11 @@
             this.SettingsDataGridView.Margin = new System.Windows.Forms.Padding(0);
             this.SettingsDataGridView.Name = "SettingsDataGridView";
             this.SettingsDataGridView.RowHeadersBorderStyle = System.Windows.Forms.DataGridViewHeaderBorderStyle.Single;
-            this.SettingsDataGridView.RowHeadersDefaultCellStyle = dataGridViewCellStyle2;
+            this.SettingsDataGridView.RowHeadersDefaultCellStyle = dataGridViewCellStyle4;
             this.SettingsDataGridView.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
-            this.SettingsDataGridView.Size = new System.Drawing.Size(671, 255);
+            this.SettingsDataGridView.Size = new System.Drawing.Size(805, 255);
             this.SettingsDataGridView.TabIndex = 2;
+            this.SettingsDataGridView.VirtualMode = true;
             this.SettingsDataGridView.CellClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.SettingsGridView_CellClick);
             this.SettingsDataGridView.CellEndEdit += new System.Windows.Forms.DataGridViewCellEventHandler(this.SettingsDataGridView_CellEndEdit);
             this.SettingsDataGridView.CellFormatting += new System.Windows.Forms.DataGridViewCellFormattingEventHandler(this.SettingsDataGridView_CellFormatting);
@@ -83,13 +89,45 @@
             this.ExportButton,
             this.ImportButton,
             this.ResetButton,
-            this.FilterTextBox});
+            this.FilterTextBox,
+            this.SelectAllButton,
+            this.DeselectAllButton,
+            this.toolStripSeparator1,
+            this.CheckSelectedButton,
+            this.UncheckSelectedButton});
             this.SettingsToolStrip.Location = new System.Drawing.Point(0, 0);
             this.SettingsToolStrip.Name = "SettingsToolStrip";
             this.SettingsToolStrip.RenderMode = System.Windows.Forms.ToolStripRenderMode.System;
-            this.SettingsToolStrip.Size = new System.Drawing.Size(671, 25);
+            this.SettingsToolStrip.Size = new System.Drawing.Size(805, 25);
             this.SettingsToolStrip.TabIndex = 3;
             this.SettingsToolStrip.Text = "MainToolStrip";
+            // 
+            // CheckSelectedButton
+            // 
+            this.CheckSelectedButton.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            this.CheckSelectedButton.Image = ((System.Drawing.Image)(resources.GetObject("CheckSelectedButton.Image")));
+            this.CheckSelectedButton.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.CheckSelectedButton.Name = "CheckSelectedButton";
+            this.CheckSelectedButton.Size = new System.Drawing.Size(23, 22);
+            this.CheckSelectedButton.Text = "toolStripButton1";
+            this.CheckSelectedButton.ToolTipText = "Check Selected";
+            this.CheckSelectedButton.Click += new System.EventHandler(this.CheckSelectedButton_Click);
+            // 
+            // UncheckSelectedButton
+            // 
+            this.UncheckSelectedButton.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            this.UncheckSelectedButton.Image = ((System.Drawing.Image)(resources.GetObject("UncheckSelectedButton.Image")));
+            this.UncheckSelectedButton.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.UncheckSelectedButton.Name = "UncheckSelectedButton";
+            this.UncheckSelectedButton.Size = new System.Drawing.Size(23, 22);
+            this.UncheckSelectedButton.Text = "toolStripButton1";
+            this.UncheckSelectedButton.ToolTipText = "Uncheck Selected";
+            this.UncheckSelectedButton.Click += new System.EventHandler(this.UncheckSelectedButton_Click);
+            // 
+            // toolStripSeparator1
+            // 
+            this.toolStripSeparator1.Name = "toolStripSeparator1";
+            this.toolStripSeparator1.Size = new System.Drawing.Size(6, 25);
             // 
             // AddButton
             // 
@@ -172,6 +210,26 @@
             this.FilterTextBox.Name = "FilterTextBox";
             this.FilterTextBox.Size = new System.Drawing.Size(100, 25);
             // 
+            // SelectAllButton
+            // 
+            this.SelectAllButton.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            this.SelectAllButton.Image = ((System.Drawing.Image)(resources.GetObject("SelectAllButton.Image")));
+            this.SelectAllButton.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.SelectAllButton.Name = "SelectAllButton";
+            this.SelectAllButton.Size = new System.Drawing.Size(23, 22);
+            this.SelectAllButton.Text = "Select All";
+            this.SelectAllButton.Click += new System.EventHandler(this.SelectAllButton_Click);
+            // 
+            // DeselectAllButton
+            // 
+            this.DeselectAllButton.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            this.DeselectAllButton.Image = ((System.Drawing.Image)(resources.GetObject("DeselectAllButton.Image")));
+            this.DeselectAllButton.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.DeselectAllButton.Name = "DeselectAllButton";
+            this.DeselectAllButton.Size = new System.Drawing.Size(23, 22);
+            this.DeselectAllButton.Text = "Deselect All";
+            this.DeselectAllButton.Click += new System.EventHandler(this.DeselectAllButton_Click);
+            // 
             // SettingsUserControl
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -179,7 +237,7 @@
             this.Controls.Add(this.SettingsDataGridView);
             this.Controls.Add(this.SettingsToolStrip);
             this.Name = "SettingsUserControl";
-            this.Size = new System.Drawing.Size(671, 280);
+            this.Size = new System.Drawing.Size(805, 280);
             ((System.ComponentModel.ISupportInitialize)(this.SettingsDataGridView)).EndInit();
             this.SettingsToolStrip.ResumeLayout(false);
             this.SettingsToolStrip.PerformLayout();
@@ -198,11 +256,16 @@
 		private System.Windows.Forms.OpenFileDialog SettingsImportOpenFileDialog;
         private System.Windows.Forms.SaveFileDialog SettingsExportSaveFileDialog;
         private System.Windows.Forms.OpenFileDialog AudioFileOpenFileDialog;
-        public System.Windows.Forms.DataGridView SettingsDataGridView;
+        public Controls.VirtualDataGridView SettingsDataGridView;
 		private System.Windows.Forms.ToolStripButton ShowInFolderButton;
 		private System.Windows.Forms.ToolStripButton ResetButton;
 		private System.Windows.Forms.ToolStripButton SaveButton;
 		public System.Windows.Forms.ToolStripTextBox FilterTextBox;
         private System.Windows.Forms.ToolStripButton EditButton;
+		private System.Windows.Forms.ToolStripButton CheckSelectedButton;
+		private System.Windows.Forms.ToolStripButton UncheckSelectedButton;
+		private System.Windows.Forms.ToolStripSeparator toolStripSeparator1;
+        private System.Windows.Forms.ToolStripButton SelectAllButton;
+        private System.Windows.Forms.ToolStripButton DeselectAllButton;
     }
 }

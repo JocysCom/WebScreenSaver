@@ -12,10 +12,11 @@ using JocysCom.ClassLibrary.ComponentModel;
 using System.Reflection;
 using System.Linq;
 using System.IO.Compression;
+using System.Runtime.Serialization;
 
 namespace JocysCom.ClassLibrary.Configuration
 {
-	[Serializable, XmlRoot("Data")]
+	[Serializable, XmlRoot("Data"), DataContract]
 	public class SettingsData<T> : ISettingsData
 	{
 
@@ -41,11 +42,14 @@ namespace JocysCom.ClassLibrary.Configuration
 
 		[XmlIgnore]
 		public FileInfo XmlFile { get { return _XmlFile; } }
+
 		[NonSerialized]
-		FileInfo _XmlFile;
+		protected FileInfo _XmlFile;
 
-		string _Comment;
+		[NonSerialized]
+		protected string _Comment;
 
+		[DataMember]
 		public SortableBindingList<T> Items { get; set; }
 
 		[XmlIgnore]
@@ -53,7 +57,7 @@ namespace JocysCom.ClassLibrary.Configuration
 
 		public delegate void ApplyOrderDelegate(SettingsData<T> source);
 
-		[XmlIgnore]
+		[XmlIgnore, NonSerialized]
 		public ApplyOrderDelegate ApplyOrder;
 
 		/// <summary>
@@ -62,11 +66,19 @@ namespace JocysCom.ClassLibrary.Configuration
 		[XmlAttribute]
 		public int Version { get; set; }
 
+		[XmlIgnore, NonSerialized]
 		object initialFileLock = new object();
+
+		[XmlIgnore, NonSerialized]
 		object saveReadFileLock = new object();
+
+		public event EventHandler Saving;
 
 		public void SaveAs(string fileName)
 		{
+			var ev = Saving;
+			if (ev != null)
+				ev(this, new EventArgs());
 			lock (saveReadFileLock)
 			{
 				for (int i = 0; i < Items.Count; i++)
@@ -79,17 +91,13 @@ namespace JocysCom.ClassLibrary.Configuration
 				{
 					fi.Directory.Create();
 				}
+				byte[] bytes;
+				bytes = Serializer.SerializeToXmlBytes(this, Encoding.UTF8, true, _Comment);
 				if (fi.Name.EndsWith(".gz"))
 				{
-					var s = Serializer.SerializeToXmlString(this, Encoding.UTF8, true);
-					var bytes = Encoding.UTF8.GetBytes(s);
-					var compressedBytes = SettingsHelper.Compress(bytes);
-					File.WriteAllBytes(fi.FullName, compressedBytes);
+					bytes = SettingsHelper.Compress(bytes);
 				}
-				else
-				{
-					Serializer.SerializeToXmlFile(this, fi.FullName, Encoding.UTF8, true, _Comment);
-				}
+				SettingsHelper.WriteIfDifferent(fi.FullName, bytes);
 			}
 		}
 
@@ -98,26 +106,26 @@ namespace JocysCom.ClassLibrary.Configuration
 			SaveAs(_XmlFile.FullName);
 		}
 
-		public void Remove(params object[] items)
+		public void Remove(params T[] items)
 		{
 			foreach (var item in items)
 			{
-				Items.Remove((T)item);
+				Items.Remove(item);
 			}
 		}
 
-		public void Add(params object[] items)
+		public void Add(params T[] items)
 		{
 			foreach (var item in items)
 			{
-				Items.Add((T)item);
+				Items.Add(item);
 			}
 		}
 
-		public delegate IList<T> FilterListDelegate(IList<T> items);
+		public delegate IList<T> ValidateDataDelegate(IList<T> items);
 
 		[NonSerialized, XmlIgnore]
-		public FilterListDelegate FilterList;
+		public ValidateDataDelegate ValidateData;
 
 		public void Load()
 		{
@@ -126,82 +134,42 @@ namespace JocysCom.ClassLibrary.Configuration
 
 		public void LoadFrom(string fileName)
 		{
-			bool settingsLoaded = false;
+			var settingsLoaded = false;
 			var fi = new FileInfo(fileName);
 			// If configuration file exists then...
 			if (fi.Exists)
 			{
+				SettingsData<T> data = null;
 				// Try to read file until success.
 				while (true)
 				{
-					SettingsData<T> data;
 					// Deserialize and load data.
 					lock (saveReadFileLock)
 					{
 						try
 						{
-							SettingsData<T> xmlItems;
-							if (fi.FullName.EndsWith(".gz"))
-							{
-								var compressedBytes = File.ReadAllBytes(fi.FullName);
-								var bytes = SettingsHelper.Decompress(compressedBytes);
-								var xml = Encoding.UTF8.GetString(bytes);
-								xmlItems = Serializer.DeserializeFromXmlString<SettingsData<T>>(xml, Encoding.UTF8);
-							}
-							else
-							{
-								xmlItems = Serializer.DeserializeFromXmlFile<SettingsData<T>>(fi.FullName);
-							}
-							data = xmlItems;
-							//foreach (T item in items.Items)
-							//{
-							//	var oldItem = data.FirstOrDefault(x => x.Group == item.Group);
-							//	// If old item was not found then...
-							//	if (oldItem == null)
-							//	{
-							//		// Add as new.
-							//		SettingsManager.Current.Settings.Items.Add(item);
-							//	}
-							//	else
-							//	{
-							//		// Udate old item.
-							//		oldItem.Group = item.Group;
-							//	}
-							//}
-							if (data != null)
-							{
-								if (ApplyOrder != null)
-								{
-									ApplyOrder(data);
-								}
-								Items.Clear();
-								if (data != null)
-								{
-									var m = FilterList;
-									var items = (m == null)
-										? data.Items
-										: m(data.Items);
-									if (items != null)
-									{
-										for (int i = 0; i < items.Count; i++) Items.Add(items[i]);
-									}
-								}
-								settingsLoaded = true;
-							}
+							var bytes = File.ReadAllBytes(fi.FullName);
+							data = DeserializeData(bytes, fi.Name.EndsWith(".gz"));
 							break;
 						}
 						catch (Exception ex)
 						{
 							var backupFile = fi.FullName + ".bak";
-							var text = string.Format("{0} file has become corrupted.\r\n\r\n" +
+							var sb = new StringBuilder();
+							sb.AppendFormat("{0} file has become corrupted.\r\n\r\n" +
 								"Reason: " + ex.Message + "\r\n\r\n" +
 								"Program must reset {0} file in order to continue.\r\n\r\n" +
 								"   Click [Yes] to reset and continue.\r\n" +
 								"   Click [No] if you wish to attempt manual repair.\r\n\r\n" +
 								" File: {1}", fi.Name, fi.FullName);
+							sb.AppendLine();
+							sb.Append('-', 64);
+							sb.AppendLine();
+							sb.AppendLine(ex.ToString());
 							var caption = string.Format("Corrupt {0} of {1}", fi.Name, Application.ProductName);
 							//var form = new MessageBox();
 							//form.StartPosition = FormStartPosition.CenterParent;
+							var text = sb.ToString();
 							var result = MessageBox.Show(text, caption, MessageBoxButtons.YesNo, MessageBoxIcon.Error);
 							if (result == DialogResult.Yes)
 							{
@@ -225,54 +193,91 @@ namespace JocysCom.ClassLibrary.Configuration
 						}
 					}
 				}
+				// If data read was successful then...
+				if (data != null)
+				{
+					// Reorder data of order method exists.
+					var ao = ApplyOrder;
+					if (ao != null)
+						ao(data);
+					LoadAndValidateData(data.Items);
+					settingsLoaded = true;
+				}
 			}
 			// If settings failed to load then...
 			if (!settingsLoaded)
 			{
 				ResetToDefault();
-			}
-			if (!settingsLoaded)
-			{
 				Save();
 			}
 		}
 
+		void LoadAndValidateData(IList<T> data)
+		{
+			// Clear original data.
+			Items.Clear();
+			if (data == null)
+				data = new SortableBindingList<T>();
+			// Filter data if filter method exists.
+			var fl = ValidateData;
+			var items = (fl == null)
+				? data
+				: fl(data);
+			for (int i = 0; i < items.Count; i++)
+				Items.Add(items[i]);
+		}
+
 		public bool ResetToDefault()
 		{
+			// Clear original data.
+			Items.Clear();
+			SettingsData<T> data = null;
+			var assemblies = new List<Assembly>();
+			var exasm = Assembly.GetExecutingAssembly();
+			var enasm = Assembly.GetEntryAssembly();
+			assemblies.Add(exasm);
+			if (exasm != enasm)
+				assemblies.Add(enasm);
 			var success = false;
-			var assembly = Assembly.GetExecutingAssembly();
-			var names = assembly.GetManifestResourceNames();
-			// Get compressed resource name.
-			var name = names.FirstOrDefault(x => x.EndsWith(_XmlFile.Name + ".gz"));
-			if (string.IsNullOrEmpty(name))
+			for (int a = 0; a < assemblies.Count; a++)
 			{
-				// Get uncompressed resource name.
-				name = names.FirstOrDefault(x => x.EndsWith(_XmlFile.Name));
-			}
-			// If internal preset was found.
-			if (!string.IsNullOrEmpty(name))
-			{
-				var resource = assembly.GetManifestResourceStream(name);
-				var sr = new StreamReader(resource);
-				byte[] bytes;
-				using (var memstream = new MemoryStream())
+				var assembly = assemblies[a];
+				var names = assembly.GetManifestResourceNames();
+				// Get compressed resource name.
+				var name = names.FirstOrDefault(x => x.EndsWith(_XmlFile.Name + ".gz"));
+				if (string.IsNullOrEmpty(name))
 				{
-					sr.BaseStream.CopyTo(memstream);
-					bytes = memstream.ToArray();
+					// Get uncompressed resource name.
+					name = names.FirstOrDefault(x => x.EndsWith(_XmlFile.Name));
 				}
-				if (name.EndsWith(".gz"))
+				// If internal preset was found.
+				if (!string.IsNullOrEmpty(name))
 				{
-
-					bytes = SettingsHelper.Decompress(bytes);
+					var resource = assembly.GetManifestResourceStream(name);
+					var sr = new StreamReader(resource);
+					byte[] bytes;
+					using (var memstream = new MemoryStream())
+					{
+						sr.BaseStream.CopyTo(memstream);
+						bytes = memstream.ToArray();
+					}
+					data = DeserializeData(bytes, name.EndsWith(".gz"));
+					success = true;
+					break;
 				}
-				var xml = Encoding.UTF8.GetString(bytes);
-				var data = Serializer.DeserializeFromXmlString<SettingsData<T>>(xml);
-				Items.Clear();
-				for (int i = 0; i < data.Items.Count; i++) Items.Add(data.Items[i]);
-				success = true;
 			}
+			LoadAndValidateData(data == null ? null : data.Items);
 			return success;
 		}
 
+		SettingsData<T> DeserializeData(byte[] bytes, bool compressed)
+		{
+			if (compressed)
+			{
+				bytes = SettingsHelper.Decompress(bytes);
+			}
+			var data = Serializer.DeserializeFromXmlBytes<SettingsData<T>>(bytes);
+			return data;
+		}
 	}
 }
