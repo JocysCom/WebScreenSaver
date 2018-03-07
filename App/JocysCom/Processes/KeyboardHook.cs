@@ -9,7 +9,7 @@ namespace JocysCom.ClassLibrary.Processes
 	{
 
 		//The ToAscii function translates the specified virtual-key code and keyboard state to the corresponding character or characters. The function translates the code using the input language and physical keyboard layout identified by the keyboard layout handle.
-		[DllImport("user32")]
+		[DllImport("user32.dll")]
 		public static extern int ToAscii(
 			int uVirtKey, //[in] Specifies the virtual-key code to be translated. 
 			int uScanCode, // [in] Specifies the hardware scan code of the key to be translated. The high-order bit of this value is set if the key is up (not pressed). 
@@ -20,13 +20,13 @@ namespace JocysCom.ClassLibrary.Processes
 
 		/// <summary>Copies the status of the 256 virtual keys to the specified buffer.</summary>
 		/// <returns>If the function succeeds, the return value is nonzero. If the function fails, the return value is zero.</returns>
-		[DllImport("user32")]
+		[DllImport("user32.dll")]
 		public static extern bool GetKeyboardState(byte[] pbKeyState);
 
 		/// <summary>Generates simple tones on the speaker.</summary>
 		/// <returns>If the function succeeds, the return value is nonzero. If the function fails, the return value is zero.</returns>
-		[DllImport("kernel32", CharSet = CharSet.Auto, CallingConvention = CallingConvention.StdCall)]
-		public static extern bool DeclareBeep(int dwFreq, int dwDuration);
+		[DllImport("kernel32.dll", CallingConvention = CallingConvention.StdCall)]
+		public static extern bool Beep(int dwFreq, int dwDuration);
 
 	}
 
