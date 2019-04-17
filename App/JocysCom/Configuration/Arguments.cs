@@ -2,6 +2,7 @@
 using System.Text.RegularExpressions;
 using System.Linq;
 using System.Reflection;
+using JocysCom.ClassLibrary.Runtime;
 
 namespace JocysCom.ClassLibrary.Configuration
 {
@@ -119,59 +120,8 @@ namespace JocysCom.ClassLibrary.Configuration
 		public T GetValue<T>(string key, bool ignoreCase = false) where T : struct
 		{
 			var valueString = GetValue(key, ignoreCase);
-			return TryParse<T>(valueString);
+			return RuntimeHelper.TryParse<T>(valueString);
 		}
-
-		#region Try Parse
-
-		/// <summary>
-		/// Tries to convert the specified string representation of a logical value to
-		/// its type T equivalent. A return value indicates whether the conversion
-		/// succeeded or failed.
-		/// </summary>
-		/// <typeparam name="T">The type to try and convert to.</typeparam>
-		/// <param name="value">A string containing the value to try and convert.</param>
-		/// <param name="result">If the conversion was successful, the converted value of type T.</param>
-		/// <returns>If value was converted successfully, true; otherwise false.</returns>
-		static bool TryParse<T>(string value, out T result) where T : struct
-		{
-			var t = typeof(T);
-			if (t.IsEnum)
-			{
-				return System.Enum.TryParse(value, true, out result);
-			}
-			var tryParseMethod = t.GetMethod("TryParse",
-				BindingFlags.Static | BindingFlags.Public, null,
-				new[] { typeof(string), t.MakeByRefType() }, null);
-			var parameters = new object[] { value, null };
-			var retVal = (bool)tryParseMethod.Invoke(null, parameters);
-			result = (T)parameters[1];
-			return retVal;
-		}
-
-		/// <summary>
-		/// Tries to convert the specified string representation of a logical value to
-		/// its type T equivalent. Returns default value if conversion failed.
-		/// </summary>
-		public static T TryParse<T>(string value, T defaultValue = default(T)) where T : struct
-		{
-			T result = default(T);
-			return TryParse(value, out result)
-				? result
-				: defaultValue;
-		}
-
-		/// <summary>
-		/// Tries to convert the specified string representation of a logical value to
-		/// its type T equivalent. Returns default value if conversion failed.
-		/// </summary>
-		public static bool CanParse<T>(string value) where T : struct
-		{
-			T result;
-			return TryParse(value, out result);
-		}
-
-		#endregion
 
 	}
 }

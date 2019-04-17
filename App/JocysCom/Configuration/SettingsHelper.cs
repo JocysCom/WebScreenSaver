@@ -61,8 +61,8 @@ namespace JocysCom.ClassLibrary.Configuration
 			else
 			{
 				// Compare checksums.
-				var byteHash = Security.MD5Helper.GetGuid(bytes);
-				var fileHash = Security.MD5Helper.GetGuidFromFile(fi.FullName);
+				var byteHash = Security.SHA256Helper.GetGuid(bytes);
+				var fileHash = Security.SHA256Helper.GetGuidFromFile(fi.FullName);
 				isDifferent = !byteHash.Equals(fileHash);
 			}
 			return isDifferent;
@@ -90,7 +90,7 @@ namespace JocysCom.ClassLibrary.Configuration
 		/// <summary>
 		/// Get file content with encoding header.
 		/// </summary>
-		public static byte[] GetFileConentBytes(string content, Encoding encoding = null)
+		public static byte[] GetFileContentBytes(string content, Encoding encoding = null)
 		{
 			var ms = new MemoryStream();
 			// Encoding header will be added to content.

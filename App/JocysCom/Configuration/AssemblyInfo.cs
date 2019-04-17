@@ -105,8 +105,8 @@ namespace JocysCom.ClassLibrary.Configuration
 				{
 					if (!_BuildDateTime.HasValue)
 					{
-						//_BuildDateTime = GetBuildDateTime(AssemblyPath);
-						_BuildDateTime = GetBuildDateTime(_assembly.Location);
+						_BuildDateTime = GetBuildDateTime(_assembly);
+						//_BuildDateTime = GetBuildDateTime(_assembly.Location);
 					}
 					return _BuildDateTime.Value;
 				}
@@ -130,13 +130,13 @@ namespace JocysCom.ClassLibrary.Configuration
 			}
 		}
 
-		public string GetTitle(bool showBuild = true, bool showRunMode = true, bool showBuildDate = true, bool showArchitecture = true, bool showDescription = true)
+		public string GetTitle(bool showBuild = true, bool showRunMode = true, bool showBuildDate = true, bool showArchitecture = true, bool showDescription = true, int versionNumbers = 3)
 		{
-			var s = string.Format("{0} {1} {2}", Company, Product, Version.ToString(3));
+			var s = string.Format("{0} {1} {2}", Company, Product, this.Version.ToString(versionNumbers));
 			if (showBuild)
 			{
 				// Version = major.minor.build.revision
-				switch (Version.Build)
+				switch (this.Version.Build)
 				{
 					case 0: s += " Alpha"; break;  // Alpha Release (AR)
 					case 1: s += " Beta 1"; break; // Master Beta (MB)
@@ -235,10 +235,20 @@ namespace JocysCom.ClassLibrary.Configuration
 			return Marshal.PtrToStringUni(AnswerBytes);
 		}
 
-		public static DateTime GetBuildDateTime(string filePath)
+		/// <summary>
+		/// Read build time from the file. This won't work with deterministic builds.
+		/// </summary>
+		/// <remarks>
+		/// The C# compiler (Roslyn) supports deterministic builds since Visual Studio 2015.
+		/// This means that compiling assemblies under the same conditions (permalink)
+		/// would produce byte-for-byte equivalent binaries.
+		/// </remarks>
+		public static DateTime GetBuildDateTime(string filePath, TimeZoneInfo tzi = null)
 		{
-			const int c_PeHeaderOffset = 60;
-			const int c_LinkerTimestampOffset = 8;
+			// Constants related to the Windows PE file format.
+			const int PE_HEADER_OFFSET = 60; // 0x3C
+			const int LINKER_TIMESTAMP_OFFSET = 8;
+			// Read header from file
 			byte[] b = new byte[2048];
 			Stream s = null;
 			try
@@ -249,15 +259,69 @@ namespace JocysCom.ClassLibrary.Configuration
 			finally
 			{
 				if (s != null)
-				{
 					s.Close();
+			}
+			// Read the linker TimeStamp
+			var offset = BitConverter.ToInt32(b, PE_HEADER_OFFSET);
+			var secondsSince1970 = BitConverter.ToInt32(b, offset + LINKER_TIMESTAMP_OFFSET);
+			// Convert the TimeStamp to a DateTime
+			var epoch = new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc);
+			var linkTimeUtc = epoch.AddSeconds(secondsSince1970);
+			var dt = TimeZoneInfo.ConvertTimeFromUtc(linkTimeUtc, tzi ?? TimeZoneInfo.Local);
+			return dt;
+		}
+
+
+		/// <summary>
+		/// Read build time from the assembly. Workaround is required to work with deterministic builds.
+		/// </summary>
+		/// <remarks>
+		/// You have two options:
+		/// Option 1: Disable Deterministic build by adding
+		///     &gt;Deterministic&lt;False&gt;/Deterministic&lt; inside a &gt;PropertyGroup&lt section  of .csproj
+		///
+		/// Option 2:
+		///     Create "Resources\BuildDate.txt" and set its "Build Action: Embedded Resource"
+		///     Add to pre-build event to work with latest .NET builds:
+		///     powershell -Command "(Get-Date).ToString(\"o\") | Out-File '$(ProjectDir)Resources\BuildDate.txt'
+		///
+		/// Note:
+		/// The C# compiler (Roslyn) supports deterministic builds since Visual Studio 2015.
+		/// This means that compiling assemblies under the same conditions (permalink)
+		/// would produce byte-for-byte equivalent binaries.
+		/// </remarks>
+		public static DateTime GetBuildDateTime(Assembly assembly, TimeZoneInfo tzi = null)
+		{
+			var names = assembly.GetManifestResourceNames();
+			DateTime dt;
+			foreach (var name in names)
+			{
+				if (!name.EndsWith("BuildDate.txt"))
+					continue;
+				var stream = assembly.GetManifestResourceStream(name);
+				using (var reader = new StreamReader(stream))
+				{
+					var date = reader.ReadToEnd();
+					dt = DateTime.Parse(date);
+					dt = TimeZoneInfo.ConvertTime(dt, tzi ?? TimeZoneInfo.Local);
+					return dt;
 				}
 			}
-			int i = BitConverter.ToInt32(b, c_PeHeaderOffset);
-			int secondsSince1970 = BitConverter.ToInt32(b, i + c_LinkerTimestampOffset);
-			DateTime dt = new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc);
-			dt = dt.AddSeconds(secondsSince1970);
-			dt = dt.ToLocalTime();
+			// Constants related to the Windows PE file format.
+			const int PE_HEADER_OFFSET = 60;
+			const int LINKER_TIMESTAMP_OFFSET = 8;
+			// Discover the base memory address where our assembly is loaded
+			var entryModule = assembly.ManifestModule;
+			var hMod = Marshal.GetHINSTANCE(entryModule);
+			if (hMod == IntPtr.Zero - 1)
+				throw new Exception("Failed to get HINSTANCE.");
+			// Read the linker TimeStamp
+			var offset = Marshal.ReadInt32(hMod, PE_HEADER_OFFSET);
+			var secondsSince1970 = Marshal.ReadInt32(hMod, offset + LINKER_TIMESTAMP_OFFSET);
+			// Convert the TimeStamp to a DateTime
+			var epoch = new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc);
+			var linkTimeUtc = epoch.AddSeconds(secondsSince1970);
+			dt = TimeZoneInfo.ConvertTimeFromUtc(linkTimeUtc, tzi ?? TimeZoneInfo.Local);
 			return dt;
 		}
 

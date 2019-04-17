@@ -20,7 +20,7 @@ namespace JocysCom.ClassLibrary.Processes
 
 		public static bool SendingKey;
 
-		public static void SendKey(string sKeys, string windowName)
+		public static void SendKey(string sKeys, string processName)
 		{
 			SendingKey = true;
 			byte VK_NUMPAD0 = 0x60;
@@ -43,8 +43,8 @@ namespace JocysCom.ClassLibrary.Processes
 			else if (sKeys == "{NUM7}") SendKey(VK_NUMPAD7);
 			else if (sKeys == "{NUM8}") SendKey(VK_NUMPAD8);
 			else if (sKeys == "{NUM9}") SendKey(VK_NUMPAD9);
-			else if (sKeys == "{RM}") MouseHelper.SendRMouseClick(windowName);
-			else if (sKeys == "{LM}") MouseHelper.SendLMouseClick(windowName);
+			else if (sKeys == "{RM}") MouseHelper.SendRMouseClick(processName);
+			else if (sKeys == "{LM}") MouseHelper.SendLMouseClick(processName);
 			else SendKeys.Send(sKeys);
 			SendingKey = false;
 		}
